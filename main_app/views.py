@@ -3,6 +3,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Finch, Toy
 from .forms import FeedingForm
 
@@ -18,10 +20,12 @@ def home(request):
 def about(request):
   return render(request, 'about.html')
 
+@login_required
 def finches_index(request):
   finches = Finch.objects.all()
   return render(request, 'finches/index.html', { 'finches': finches })
 
+@login_required
 def finches_detail(request, finch_id):
   finch = Finch.objects.get(id=finch_id)
   toys_finch_doesnt_have = Toy.objects.exclude(id__in = finch.toys.all().values_list('id'))
@@ -29,6 +33,7 @@ def finches_detail(request, finch_id):
   return render(request, 'finches/detail.html', { 'finch': finch, 'feeding_form': feeding_form,
   'toys': toys_finch_doesnt_have })
 
+@login_required
 def add_feeding(request, finch_id):
   form = FeedingForm(request.POST)
   # validate the form
@@ -40,7 +45,7 @@ def add_feeding(request, finch_id):
     new_feeding.save()
   return redirect('detail', finch_id=finch_id)
 
-class FinchCreate(CreateView):
+class FinchCreate(LoginRequiredMixin, CreateView):
   model = Finch
   fields = '__all__'
   def form_valid(self, form):
@@ -48,33 +53,34 @@ class FinchCreate(CreateView):
     return super().form_valid(form)
   
 
-class FinchUpdate(UpdateView):
+class FinchUpdate(LoginRequiredMixin, UpdateView):
   model = Finch
   # Let's disallow the renaming of a Finch by excluding the name field!
   fields = ['breed', 'description', 'age']
 
-class FinchDelete(DeleteView):
+class FinchDelete(LoginRequiredMixin, DeleteView):
   model = Finch
   success_url = '/finches/'
 
-class ToyList(ListView):
+class ToyList(LoginRequiredMixin, ListView):
   model = Toy
 
-class ToyDetail(DetailView):
+class ToyDetail(LoginRequiredMixin, DetailView):
   model = Toy
 
-class ToyCreate(CreateView):
+class ToyCreate(LoginRequiredMixin, CreateView):
   model = Toy
   fields = '__all__'
 
-class ToyUpdate(UpdateView):
+class ToyUpdate(LoginRequiredMixin, UpdateView):
   model = Toy
   fields = ['name', 'color']
 
-class ToyDelete(DeleteView):
+class ToyDelete(LoginRequiredMixin, DeleteView):
   model = Toy
   success_url = '/toys/'
 
+@login_required
 def assoc_toy(request, finch_id, toy_id):
   # Note that you can pass a toy's id instead of the whole object
   Finch.objects.get(id=finch_id).toys.add(toy_id)
