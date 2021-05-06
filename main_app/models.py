@@ -9,7 +9,11 @@ MEALS = (
     ('D', 'Dinner')
 )
 
-# Create your models here.
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    favorite_color = models.CharField(max_length=50)
+
 class Toy(models.Model):
   name = models.CharField(max_length=50)
   color = models.CharField(max_length=20)
@@ -41,7 +45,7 @@ class Feeding(models.Model):
 		choices=MEALS,
 		default=MEALS[0][0]
   )
-  # Create a cat_id FK
+  
   finch = models.ForeignKey(Finch, on_delete=models.CASCADE)
 
   def __str__(self):
@@ -52,3 +56,10 @@ class Feeding(models.Model):
   
   def fed_for_today(self):
     return self.feeding_set.filter(date=date.today()).count() >= len(MEALS)
+
+class Photo(models.Model):
+  url = models.CharField(max_length=200)
+  finch = models.ForeignKey(Finch, on_delete=models.CASCADE)
+
+  def __str__(self):
+    return f"Photo for finch_id: {self.finch_id} @{self.url}"

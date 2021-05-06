@@ -17,5 +17,5 @@ urlpatterns = [
   path('toys/<int:pk>/delete/', views.ToyDelete.as_view(), name='toys_delete'),
   path('toys/', views.ToyList.as_view(), name='toys_index'),
   path('accounts/signup/', views.signup, name='signup'),
-  
+  path('finches/<int:finch_id>/add_photo/', views.add_photo, name='add_photo'),
 ]
